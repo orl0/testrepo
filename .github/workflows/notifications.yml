@@ -8,16 +8,21 @@ jobs:
     name: Notify
     runs-on: ubuntu-latest
     steps:
-      - name: debug
-        run: echo "${{ toJSON(github.event) }}"
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+
+      - name: Format commits text
+        id: format_text
+        run: echo "::set-output name=text::$(echo 'HOHOHO!')"
         shell: bash
+
       - name: Telegram Message Notify
         uses: appleboy/telegram-action@v0.1.1
+        env:
+          COMMITS_TEXT: ${{ steps.format_text.outputs.text }}
         with:
           to: ${{ secrets.TELEGRAM_TO }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
           format: markdown
-          message: |
-            Обновления в репозитории '[${{ github.repository }}](${{ github.event.repository.html_url }})':
-
+          message_file: message.md
 # ${{ join(github.event.commits.*.message, '\n\n') }}
