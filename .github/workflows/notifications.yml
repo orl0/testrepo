@@ -24,5 +24,4 @@ jobs:
           to: ${{ secrets.TELEGRAM_TO }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
           format: markdown
-          message_file: message.md
-# ${{ join(github.event.commits.*.message, '\n\n') }}
+          message_file: message.txt
