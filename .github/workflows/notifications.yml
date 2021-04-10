@@ -21,8 +21,8 @@ jobs:
         env:
           COMMITS_TEXT: ${{ steps.format_text.outputs.text }}
         with:
-          debug: true
           to: ${{ secrets.TELEGRAM_TO }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
-          format: markdown
-          message_file: message.txt
+          format: html
+          message: |
+            Обновления в репозитории <b><i><a href="${{ github.event.repository.html_url }}">${{ github.repository }}</a></b></i>
