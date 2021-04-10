@@ -1,0 +1,20 @@
+name: Notifications to Telegram
+on:
+  push:
+    branches:
+      - main
+jobs:
+  notify:
+    name: Notify
+    runs-on: ubuntu-latest
+    steps:
+      - name: Telegram Message Notify
+        uses: appleboy/telegram-action@v0.1.1
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: |
+            Обновления в репозитории '[${{ github.repository }}](${{ github.event.repository.html_url }})':
+            ${{ toJSON(github.event) }}
+
+# ${{ join(github.event.commits.*.message, '\n\n') }}
