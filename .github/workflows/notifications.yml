@@ -8,6 +8,9 @@ jobs:
     name: Notify
     runs-on: ubuntu-latest
     steps:
+      - name: debug
+        run: echo "${{ toJSON(github.event) }}"
+        shell: bash
       - name: Telegram Message Notify
         uses: appleboy/telegram-action@v0.1.1
         with:
@@ -15,6 +18,5 @@ jobs:
           token: ${{ secrets.TELEGRAM_TOKEN }}
           message: |
             Обновления в репозитории '[${{ github.repository }}](${{ github.event.repository.html_url }})':
-            ${{ toJSON(github.event) }}
 
 # ${{ join(github.event.commits.*.message, '\n\n') }}
