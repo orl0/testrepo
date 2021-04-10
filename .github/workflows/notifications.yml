@@ -25,4 +25,4 @@ jobs:
           token: ${{ secrets.TELEGRAM_TOKEN }}
           format: html
           message: |
-            Обновления в репозитории <b><i><a href="${{ github.event.repository.html_url }}">${{ github.repository }}</a></b></i>
+            Обновления в репозитории <b><i><a href="${{ github.event.repository.html_url }}">${{ github.repository }}</a></i></b>
