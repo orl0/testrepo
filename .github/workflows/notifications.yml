@@ -13,7 +13,7 @@ jobs:
 
       - name: Format commits text
         id: format_text
-        run: echo "::set-output name=text::$(echo ${{ github.event.commits }} | jq '.[] | .id,.timestamp,.committer.username,.message')"
+        run: echo "::set-output name=text::$(echo ${{ toJSON(github.event.commits) }} | jq '.[] | .id,.timestamp,.committer.username,.message')"
         shell: bash
 
       - name: Telegram Message Notify
