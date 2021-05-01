@@ -8,12 +8,12 @@ jobs:
     name: Notify
     runs-on: ubuntu-latest
     steps:
-      - name: Check out Git repository
-        uses: actions/checkout@v2
+      # - name: Check out Git repository
+      #   uses: actions/checkout@v2
 
       - name: Format commits text
         id: format_text
-        run: echo "::set-output name=text::$(echo 'HOHOHO!')"
+        run: echo "::set-output name=text::$(echo ${{ github.event.commits }} | jq '.[] | .id,.timestamp,.committer.username,.message')"
         shell: bash
 
       - name: Telegram Message Notify
@@ -25,4 +25,6 @@ jobs:
           token: ${{ secrets.TELEGRAM_TOKEN }}
           format: html
           message: |
-            Обновления в репозитории <b><i><a href="${{ github.event.repository.html_url }}">${{ github.repository }}</a></i></b>
+            📣 ОБНОВЛЕНИЯ В <b><a href="${{ github.event.repository.html_url }}">${{ github.repository }}</a></b>
+
+            <pre>${{ env.COMMITS_TEXT }}</pre>
