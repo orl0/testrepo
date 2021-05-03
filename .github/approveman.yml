@@ -16,4 +16,4 @@ ownership_rules:
     # The name of the rules that is used mainly for logging.
     - name: "Approve everything"
       # The directory that certain user with {{username}} owns.
-      path: "**"
+      path: "**/*"
