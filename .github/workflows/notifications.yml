@@ -11,13 +11,15 @@ jobs:
     env:
       mustache_template: |
         {{#repository}}
-        📣 ОБНОВЛЕНИЯ В <b><a href="{{{repository.html_url}}}">{{{repository.full_name}}}</a></b>
-
+        📣 ОБНОВЛЕНИЯ В <b><a href="{{{repository.html_url}}}">{{{repository.full_name}}}</a></b>\n
+        \n
         {{/repository}}
         {{#commits}}
-        <strong><a href="{{{url}}}">✔️{{id}}</a></strong><em> ({{timestamp}}) by </em><strong><a href="https://github.com/{{author.username}}">👤{{author.username}}</a></strong>
-        <pre>{{message}}
-        </pre>
+        <strong><a href="{{{url}}}">✔️ {{id}}</a></strong>\n
+        <em>({{timestamp}})</em> by <strong><a href="https://github.com/{{author.username}}">👤{{author.username}}</a></strong>\n
+        \n
+        <pre>{{message}}\n
+        </pre>\n
         {{/commits}}
         {{^commits}}No commits found... :({{/commits}}
 
