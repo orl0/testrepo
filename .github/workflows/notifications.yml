@@ -11,15 +11,15 @@ jobs:
     env:
       mustache_template: |
         {{#repository}}
-        📣 ОБНОВЛЕНИЯ В <b><a href="{{{repository.html_url}}}">{{{repository.full_name}}}</a></b>\n
-        \n
+        📣 ОБНОВЛЕНИЯ В <b><a href="{{{repository.html_url}}}">{{{repository.full_name}}}</a></b>
+
         {{/repository}}
         {{#commits}}
-        <strong><a href="{{{url}}}">✔️ {{id}}</a></strong>\n
-        <em>({{timestamp}})</em> by <strong><a href="https://github.com/{{author.username}}">👤{{author.username}}</a></strong>\n
-        \n
-        <pre>{{message}}\n
-        </pre>\n
+        <strong><a href="{{{url}}}">✔️ {{id}}</a></strong>
+        <em>({{timestamp}})</em> by <strong><a href="https://github.com/{{author.username}}">👤{{author.username}}</a></strong>
+
+        <pre>{{message}}
+        </pre>
         {{/commits}}
         {{^commits}}No commits found... :({{/commits}}
 
@@ -27,8 +27,9 @@ jobs:
       - name: Format Telegram Message
         id: format_text
         run: |
-          echo $mustache_template > template.mustache
-          echo '${{ toJSON(github.event) }}' | npx -q mustache@4.2 - template.mustache > out
+          echo '${{ toJSON(github.event) }}' | jq -c '.' > view.json
+          echo -e "$mustache_template" > template.mustache
+          npx -q mustache@4.2 view.json template.mustache > out
         shell: bash
 
       - name: Send Telegram Notification
