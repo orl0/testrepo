@@ -1,4 +1,4 @@
 Sample message loaded from file.
 
 Commit msg:  {{repo}}
-zz
+asd
