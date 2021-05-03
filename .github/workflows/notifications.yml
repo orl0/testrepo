@@ -1,41 +1,42 @@
-name: Notifications to Telegram
+name: Telegram Notifications
 on:
   push:
     branches:
       - main
 jobs:
   notify:
-    name: Notify
+    name: Send message to Telegram
     runs-on: ubuntu-latest
-
-    env:
-      mustache_template: |
-        {{#repository}}
-        📣 ОБНОВЛЕНИЯ В <b><a href="{{{repository.html_url}}}">{{{repository.full_name}}}</a></b>
-
-        {{/repository}}
-        {{#commits}}
-        <strong><a href="{{{url}}}">✔️ {{id}}</a></strong>
-        <em>({{timestamp}})</em> by <strong><a href="https://github.com/{{author.username}}">👤{{author.username}}</a></strong>
-
-        <pre>{{message}}
-        </pre>
-        {{/commits}}
-        {{^commits}}No commits found... :({{/commits}}
 
     steps:
       - name: Format Telegram Message
-        id: format_text
+
+        env:
+          mustache_template: |
+            {{#repository}}
+            📣 ОБНОВЛЕНИЯ В <b><a href="{{{repository.html_url}}}">{{{repository.full_name}}}</a></b>
+
+            {{/repository}}
+            {{#commits}}
+            <strong><a href="{{{url}}}">✔️ {{id}}</a></strong>
+            <em>({{timestamp}})</em> by <strong><a href="https://github.com/{{author.username}}">👤{{author.username}}</a></strong>
+
+            <pre>{{message}}
+            </pre>
+            {{/commits}}
+            {{^commits}}No commits found... :({{/commits}}
+
         run: |
           echo '${{ toJSON(github.event) }}' | jq -c '.' > view.json
           echo -e "$mustache_template" > template.mustache
           npx -q mustache@4.2 view.json template.mustache > out
         shell: bash
 
-      - name: Send Telegram Notification
-        uses: appleboy/telegram-action@v0.1.1
-        with:
-          to: ${{ secrets.TELEGRAM_TO }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          format: html
-          message_file: out
+      - name: Send formatted message
+
+        run: |
+          curl -sSq --max-time 10 --retry 5 --retry-delay 2 --retry-max-time 10 \
+            -d "disable_web_page_preview=false" -d "parse_mode=HTML" \
+            -d "chat_id=${{secrets.TELEGRAM_TO}}" --data-urlencode "text@"<(cat -- out) \
+            "https://api.telegram.org/bot${{secrets.TELEGRAM_TOKEN}}/sendMessage"
+        shell: bash
