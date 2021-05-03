@@ -1,4 +1,3 @@
 Sample message loaded from file.
 
 Commit msg:  {{repo}}
-asd
