@@ -1,1 +1,3 @@
 TZ='Europe/Moscow' date --date='2021-04-01T23:32:24+03:00' +'%d-%b-%y %R'
+
+jq -r '.commits[].timestamp' view.json | TZ='Europe/Moscow' date -f - +'"%d.%m.%y %R"'
