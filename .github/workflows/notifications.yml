@@ -15,6 +15,7 @@ jobs:
     steps:
       - name: Format Telegram Message
         env:
+          gh_event: ${{ toJSON(github.event) }}
           mustache_template: |
             {{#repository}}
             📣 ОБНОВЛЕНИЯ В <b><a href="{{{repository.html_url}}}">{{{repository.full_name}}}</a></b>
@@ -29,20 +30,27 @@ jobs:
             {{/commits}}
             {{^commits}}No commits found... :({{/commits}}
         run: |
-          echo "::group::Create Mustache template & view files"
-          echo '${{ toJSON(github.event) }}' > view.json
-          echo '${{ env.mustache_template }}' > template.mustache
-          echo "::endgroup::"
+          # Output ENV vars to files and run Mustache via npx
+          echo "${gh_event}" > view.json
+          echo "${mustache_template}" > template.mustache
           npx -q mustache@4.2 view.json template.mustache > __out__
+          echo "::group::Debug output"
+          echo "::stop-commands::pause-logging"
           echo "::debug::$(cat -- __out__)"
+          echo "::pause-logging::"
+          echo "::endgroup::"
 
       - name: Send formatted message
         run: |
-          curl -q -s -L --fail-with-body --max-time 10 --retry 5 --retry-delay 2 --retry-max-time 10 \
+          curl -q -s -L --max-time 10 --retry 5 --retry-delay 2 --retry-max-time 10 \
             -d "disable_web_page_preview=false" -d "parse_mode=HTML" \
             -d "chat_id=${{secrets.TELEGRAM_TO}}" --data-urlencode "text@"<(cat -- __out__) \
-            "https://api.telegram.org/bot${{secrets.TELEGRAM_TOKEN}}/sendMessage" > result.json || true
+            "https://api.telegram.org/bot${{secrets.TELEGRAM_TOKEN}}/sendMessage" > result.json
+          echo "::group::Debug output"
+          echo "::stop-commands::pause-logging"
           echo "::debug::$(jq '.' result.json 2>/dev/null || cat result.json)"
+          echo "::pause-logging::"
+          echo "::endgroup::"
 
       - name: Check Telegram response
         run: |
