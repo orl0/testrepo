@@ -8,9 +8,12 @@ jobs:
     name: Send message to Telegram
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        shell: bash
+
     steps:
       - name: Format Telegram Message
-
         env:
           mustache_template: |
             {{#repository}}
@@ -25,18 +28,25 @@ jobs:
             </pre>
             {{/commits}}
             {{^commits}}No commits found... :({{/commits}}
-
         run: |
-          echo '${{ toJSON(github.event) }}' | jq -c '.' > view.json
-          echo -e "$mustache_template" > template.mustache
-          npx -q mustache@4.2 view.json template.mustache > out
-        shell: bash
+          echo "::group::Create Mustache template & view files"
+          echo '${{ toJSON(github.event) }}' > view.json
+          echo '${{ env.mustache_template }}' > template.mustache
+          echo "::endgroup::"
+          npx -q mustache@4.2 view.json template.mustache > __out__
+          echo "::debug::$(cat -- __out__)"
 
       - name: Send formatted message
-
         run: |
-          curl -sSq --max-time 10 --retry 5 --retry-delay 2 --retry-max-time 10 \
+          curl -q -s -L --fail-with-body --max-time 10 --retry 5 --retry-delay 2 --retry-max-time 10 \
             -d "disable_web_page_preview=false" -d "parse_mode=HTML" \
-            -d "chat_id=${{secrets.TELEGRAM_TO}}" --data-urlencode "text@"<(cat -- out) \
-            "https://api.telegram.org/bot${{secrets.TELEGRAM_TOKEN}}/sendMessage"
-        shell: bash
+            -d "chat_id=${{secrets.TELEGRAM_TO}}" --data-urlencode "text@"<(cat -- __out__) \
+            "https://api.telegram.org/bot${{secrets.TELEGRAM_TOKEN}}/sendMessage" > result.json || true
+          echo "::debug::$(jq '.' result.json 2>/dev/null || cat result.json)"
+
+      - name: Check Telegram response
+        run: |
+          [[ $(jq '.ok' result.json 2>/dev/null) == "true" ]] || ( printf "::error::\
+          Telegram API response: %s - %s\n" \
+          $(jq '.error_code,.description' result.json 2>/dev/null || echo '<Not JSON!>'); \
+          exit 1 )
