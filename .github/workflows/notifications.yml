@@ -30,14 +30,12 @@ jobs:
             {{/commits}}
             {{^commits}}No commits found... :({{/commits}}
         run: |
-          # Output ENV vars to files and run Mustache via npx
+          # Mustache via npx
           echo "${gh_event}" > view.json
           echo "${mustache_template}" > template.mustache
           npx -q mustache@4.2 view.json template.mustache > __out__
           echo "::group::Debug output"
-          echo "::stop-commands::pause-logging"
-          echo "::debug::$(cat -- __out__)"
-          echo "::pause-logging::"
+          cat -- __out__
           echo "::endgroup::"
 
       - name: Send formatted message
@@ -46,11 +44,6 @@ jobs:
             -d "disable_web_page_preview=false" -d "parse_mode=HTML" \
             -d "chat_id=${{secrets.TELEGRAM_TO}}" --data-urlencode "text@"<(cat -- __out__) \
             "https://api.telegram.org/bot${{secrets.TELEGRAM_TOKEN}}/sendMessage" > result.json
-          echo "::group::Debug output"
-          echo "::stop-commands::pause-logging"
-          echo "::debug::$(jq '.' result.json 2>/dev/null || cat result.json)"
-          echo "::pause-logging::"
-          echo "::endgroup::"
 
       - name: Check Telegram response
         run: |
