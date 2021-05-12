@@ -47,7 +47,8 @@ jobs:
 
       - name: Check Telegram response
         run: |
-          [[ $(jq '.ok' result.json 2>/dev/null) == "true" ]] || ( printf "::error::\
-          Telegram API response: %s - %s\n" \
-          $(jq '.error_code,.description' result.json 2>/dev/null || echo '<Not JSON!>'); \
-          exit 1 )
+          if [[ $(jq '.ok' result.json 2>/dev/null) == "true" ]]; then
+            printf "::error::Telegram API response: %s - %s\n" \
+            $(jq '.error_code,.description' result.json 2>/dev/null || echo '<Not JSON!>')
+            exit 1
+          fi
